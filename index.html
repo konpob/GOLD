@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,11 +23,22 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* Scrollbars */
-    ::-webkit-scrollbar { height: 8px; width: 8px; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
   </style>
 </head>
+
 <body class="bg-slate-50 text-slate-900 antialiased">
   <header class="sticky top-0 z-30 backdrop-blur bg-white/80 border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -36,8 +48,12 @@
         <p class="text-xs text-slate-500">จำลองเส้นทางการเติบโตของเงิน · เปรียบเทียบหลายเส้นทาง · ระยะเวลาแตกต่างกัน</p>
       </div>
       <div class="ml-auto flex gap-2">
-        <button id="saveBtn" class="px-3 py-1.5 text-sm rounded-xl bg-slate-900 text-white hover:bg-slate-800">บันทึกข้อมูล</button>
-        <button id="resetBtn" class="px-3 py-1.5 text-sm rounded-xl bg-white border border-slate-300 hover:bg-slate-100">รีเซ็ต</button>
+        <a href="/gold.html"
+          class="rounded-xl bg-indigo-600 text-white px-4 py-2 hover:bg-indigo-700">วัตถุประสงค์ระบบ</a>
+        <button id="saveBtn"
+          class="px-3 py-1.5 text-sm rounded-xl bg-slate-900 text-white hover:bg-slate-800">บันทึกข้อมูล</button>
+        <button id="resetBtn"
+          class="px-3 py-1.5 text-sm rounded-xl bg-white border border-slate-300 hover:bg-slate-100">รีเซ็ต</button>
       </div>
     </div>
   </header>
@@ -52,18 +68,25 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">เงินตั้งต้น (บาท)</span>
-            <input id="initial" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="10000" min="0"/>
+            <input id="initial" type="number"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="10000"
+              min="0" />
           </label>
           <label class="text-sm">
-            <span class="block text-slate-600 mb-1">เป้าหมายเงิน (บาท) <span class="text-slate-400">(ไม่บังคับ)</span></span>
-            <input id="goal" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="เช่น 500000" />
+            <span class="block text-slate-600 mb-1">เป้าหมายเงิน (บาท) <span
+                class="text-slate-400">(ไม่บังคับ)</span></span>
+            <input id="goal" type="number"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="เช่น 500000" />
           </label>
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">เงินเฟ้อต่อปี (%)</span>
-            <input id="inflation" type="number" step="0.1" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="2.0" />
+            <input id="inflation" type="number" step="0.1"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="2.0" />
           </label>
           <div class="text-sm flex items-end">
-            <button id="goalCalcBtn" class="mt-6 w-full rounded-xl border border-indigo-200 text-indigo-700 px-3 py-2 hover:bg-indigo-50">คำนวณเงินออม/เดือนเพื่อถึงเป้า</button>
+            <button id="goalCalcBtn"
+              class="mt-6 w-full rounded-xl border border-indigo-200 text-indigo-700 px-3 py-2 hover:bg-indigo-50">คำนวณเงินออม/เดือนเพื่อถึงเป้า</button>
           </div>
         </div>
         <p id="goalCalcOut" class="mt-3 text-sm text-indigo-700"></p>
@@ -76,32 +99,46 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">ชื่อเส้นทาง</span>
-            <input id="scName" type="text" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="เช่น ประหยัด/สมดุล/รุก" />
+            <input id="scName" type="text"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="เช่น ประหยัด/สมดุล/รุก" />
           </label>
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">รายได้ต่อเดือน (บาท)</span>
-            <input id="income" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="30000" min="0" />
+            <input id="income" type="number"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="30000"
+              min="0" />
           </label>
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">รายจ่ายต่อเดือน (บาท)</span>
-            <input id="expense" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="22000" min="0" />
+            <input id="expense" type="number"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="22000"
+              min="0" />
           </label>
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">เงินลงทุน/ออมต่อเดือน (บาท)</span>
-            <input id="contrib" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="เว้นว่างเพื่อใช้=รายได้-รายจ่าย" />
+            <input id="contrib" type="number"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="เว้นว่างเพื่อใช้=รายได้-รายจ่าย" />
           </label>
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">ผลตอบแทนต่อปี (%)</span>
-            <input id="apy" type="number" step="0.1" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="6" />
+            <input id="apy" type="number" step="0.1"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="6" />
           </label>
           <label class="text-sm">
             <span class="block text-slate-600 mb-1">ระยะเวลา (ปี)</span>
-            <input id="years" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="5" min="1" />
+            <input id="years" type="number"
+              class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="5"
+              min="1" />
           </label>
         </div>
         <div class="flex items-center gap-2 mt-4">
-          <button id="addScenarioBtn" class="rounded-xl bg-indigo-600 text-white px-4 py-2 hover:bg-indigo-700">เพิ่มเส้นทาง</button>
-          <button id="addPresetBtn" class="rounded-xl bg-white border border-slate-300 px-4 py-2 hover:bg-slate-100">เพิ่มตัวอย่าง 3 แบบ</button>
+          <button id="addScenarioBtn"
+            class="rounded-xl bg-indigo-600 text-white px-4 py-2 hover:bg-indigo-700">เพิ่มเส้นทาง</button>
+          <button id="addPresetBtn"
+            class="rounded-xl bg-white border border-slate-300 px-4 py-2 hover:bg-slate-100">เพิ่มตัวอย่าง 3
+            แบบ</button>
         </div>
       </div>
 
@@ -121,7 +158,9 @@
           <h2 class="font-semibold text-slate-800">กราฟเงินเติบโต</h2>
           <span class="text-xs text-slate-500">กดชื่อเส้นทางเพื่อซ่อน/แสดงในคำอธิบายกราฟ</span>
           <div class="ml-auto flex items-center gap-2">
-            <button id="exportCsvBtn" class="px-3 py-1.5 text-sm rounded-xl bg-white border border-slate-300 hover:bg-slate-100">ส่งออก CSV</button>
+            <button id="exportCsvBtn"
+              class="px-3 py-1.5 text-sm rounded-xl bg-white border border-slate-300 hover:bg-slate-100">ส่งออก
+              CSV</button>
           </div>
         </div>
         <canvas id="chart" height="280"></canvas>
@@ -153,306 +192,307 @@
     เคล็ดลับ: ทดลองแก้ไขรายได้/รายจ่าย/ผลตอบแทน แล้วดูความต่างของเส้นทาง และระยะเวลาที่ถึงเป้าหมาย
   </footer>
 
-<script>
-  // ===== Utilities =====
-  const fmt = new Intl.NumberFormat('th-TH');
-  const toBaht = n => (isFinite(n) ? fmt.format(Math.round(n)) + ' ฿' : '-');
-  const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
+  <script>
+    // ===== Utilities =====
+    const fmt = new Intl.NumberFormat('th-TH');
+    const toBaht = n => (isFinite(n) ? fmt.format(Math.round(n)) + ' ฿' : '-');
+    const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
 
-  // Random pleasant color for datasets
-  function randColor(){
-    const h = Math.floor(Math.random()*360);
-    return `hsl(${h} 80% 45%)`;
-  }
-
-  // Compute growth arrays
-  function simulate({initial, monthly, apy, months}){
-    const i = Math.pow(1 + apy/100, 1/12) - 1; // monthly rate
-    let b = initial;
-    const series = [];
-    for(let m=0; m<=months; m++){
-      series.push(b);
-      // compound then add contribution at end of month
-      b = b * (1 + i) + monthly;
+    // Random pleasant color for datasets
+    function randColor() {
+      const h = Math.floor(Math.random() * 360);
+      return `hsl(${h} 80% 45%)`;
     }
-    return series;
-  }
 
-  function adjustInflation(series, infl){
-    const j = Math.pow(1 + infl/100, 1/12) - 1;
-    let factor = 1;
-    return series.map((v, idx) => {
-      if(idx===0) return v;
-      factor *= (1 + j);
-      return v / factor; // convert to real terms
+    // Compute growth arrays
+    function simulate({ initial, monthly, apy, months }) {
+      const i = Math.pow(1 + apy / 100, 1 / 12) - 1; // monthly rate
+      let b = initial;
+      const series = [];
+      for (let m = 0; m <= months; m++) {
+        series.push(b);
+        // compound then add contribution at end of month
+        b = b * (1 + i) + monthly;
+      }
+      return series;
+    }
+
+    function adjustInflation(series, infl) {
+      const j = Math.pow(1 + infl / 100, 1 / 12) - 1;
+      let factor = 1;
+      return series.map((v, idx) => {
+        if (idx === 0) return v;
+        factor *= (1 + j);
+        return v / factor; // convert to real terms
+      });
+    }
+
+    function monthsToGoal(series, goal) {
+      if (!goal || goal <= 0) return null;
+      for (let m = 0; m < series.length; m++) {
+        if (series[m] >= goal) return m;
+      }
+      return null;
+    }
+
+    // Solve required monthly contribution for goal
+    function requiredMonthlyForGoal({ initial, apy, months, goal }) {
+      if (!goal || goal <= 0) return null;
+      const r = Math.pow(1 + apy / 100, 1 / 12) - 1;
+      const pow = Math.pow(1 + r, months);
+      if (r === 0) {
+        return (goal - initial * pow) / months; // linear case
+      }
+      const c = (goal - initial * pow) * r / (pow - 1);
+      return c > 0 ? c : 0;
+    }
+
+    // ===== State =====
+    const state = {
+      scenarios: [],
+      chart: null,
+    };
+
+    // ===== Elements =====
+    const els = {
+      initial: document.getElementById('initial'),
+      goal: document.getElementById('goal'),
+      inflation: document.getElementById('inflation'),
+
+      scName: document.getElementById('scName'),
+      income: document.getElementById('income'),
+      expense: document.getElementById('expense'),
+      contrib: document.getElementById('contrib'),
+      apy: document.getElementById('apy'),
+      years: document.getElementById('years'),
+
+      scenarioList: document.getElementById('scenarioList'),
+      summaryBody: document.getElementById('summaryBody'),
+
+      exportCsvBtn: document.getElementById('exportCsvBtn'),
+      addScenarioBtn: document.getElementById('addScenarioBtn'),
+      addPresetBtn: document.getElementById('addPresetBtn'),
+      saveBtn: document.getElementById('saveBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      goalCalcBtn: document.getElementById('goalCalcBtn'),
+      goalCalcOut: document.getElementById('goalCalcOut'),
+    };
+
+    // ===== Chart Init =====
+    const ctx = document.getElementById('chart').getContext('2d');
+    state.chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${toBaht(ctx.parsed.y)}` } }
+        },
+        scales: {
+          x: { title: { display: true, text: 'เดือน' } },
+          y: { title: { display: true, text: 'มูลค่า (บาท)' }, ticks: { callback: v => fmt.format(v) } }
+        },
+        elements: { line: { tension: .18 } }
+      }
     });
-  }
 
-  function monthsToGoal(series, goal){
-    if(!goal || goal <= 0) return null;
-    for(let m=0; m<series.length; m++){
-      if(series[m] >= goal) return m;
+    function refreshChart() {
+      const monthsMax = Math.max(0, ...state.scenarios.map(s => s.months));
+      const labels = Array.from({ length: monthsMax + 1 }, (_, i) => i);
+      state.chart.data.labels = labels;
+      state.chart.data.datasets = state.scenarios.map(s => ({
+        label: s.name,
+        borderColor: s.color,
+        backgroundColor: s.color,
+        data: s.series,
+        pointRadius: 0,
+        borderWidth: 2,
+        fill: false,
+        hidden: s.hidden || false,
+      }));
+      state.chart.update();
     }
-    return null;
-  }
 
-  // Solve required monthly contribution for goal
-  function requiredMonthlyForGoal({initial, apy, months, goal}){
-    if(!goal || goal <= 0) return null;
-    const r = Math.pow(1 + apy/100, 1/12) - 1;
-    const pow = Math.pow(1 + r, months);
-    if(r === 0){
-      return (goal - initial*pow) / months; // linear case
-    }
-    const c = (goal - initial * pow) * r / (pow - 1);
-    return c > 0 ? c : 0;
-  }
-
-  // ===== State =====
-  const state = {
-    scenarios: [],
-    chart: null,
-  };
-
-  // ===== Elements =====
-  const els = {
-    initial: document.getElementById('initial'),
-    goal: document.getElementById('goal'),
-    inflation: document.getElementById('inflation'),
-
-    scName: document.getElementById('scName'),
-    income: document.getElementById('income'),
-    expense: document.getElementById('expense'),
-    contrib: document.getElementById('contrib'),
-    apy: document.getElementById('apy'),
-    years: document.getElementById('years'),
-
-    scenarioList: document.getElementById('scenarioList'),
-    summaryBody: document.getElementById('summaryBody'),
-
-    exportCsvBtn: document.getElementById('exportCsvBtn'),
-    addScenarioBtn: document.getElementById('addScenarioBtn'),
-    addPresetBtn: document.getElementById('addPresetBtn'),
-    saveBtn: document.getElementById('saveBtn'),
-    resetBtn: document.getElementById('resetBtn'),
-    goalCalcBtn: document.getElementById('goalCalcBtn'),
-    goalCalcOut: document.getElementById('goalCalcOut'),
-  };
-
-  // ===== Chart Init =====
-  const ctx = document.getElementById('chart').getContext('2d');
-  state.chart = new Chart(ctx, {
-    type: 'line',
-    data: { labels: [], datasets: [] },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${toBaht(ctx.parsed.y)}` } }
-      },
-      scales: {
-        x: { title: { display: true, text: 'เดือน' } },
-        y: { title: { display: true, text: 'มูลค่า (บาท)' }, ticks: { callback: v => fmt.format(v) } }
-      },
-      elements: { line: { tension: .18 } }
-    }
-  });
-
-  function refreshChart(){
-    const monthsMax = Math.max(0, ...state.scenarios.map(s => s.months));
-    const labels = Array.from({length: monthsMax+1}, (_,i) => i);
-    state.chart.data.labels = labels;
-    state.chart.data.datasets = state.scenarios.map(s => ({
-      label: s.name,
-      borderColor: s.color,
-      backgroundColor: s.color,
-      data: s.series,
-      pointRadius: 0,
-      borderWidth: 2,
-      fill: false,
-      hidden: s.hidden || false,
-    }));
-    state.chart.update();
-  }
-
-  function renderScenarioList(){
-    els.scenarioList.innerHTML = '';
-    state.scenarios.forEach((s, idx) => {
-      const li = document.createElement('li');
-      li.className = 'p-3 rounded-xl border border-slate-200 flex items-center gap-3';
-      li.innerHTML = `
+    function renderScenarioList() {
+      els.scenarioList.innerHTML = '';
+      state.scenarios.forEach((s, idx) => {
+        const li = document.createElement('li');
+        li.className = 'p-3 rounded-xl border border-slate-200 flex items-center gap-3';
+        li.innerHTML = `
         <span class="inline-block w-3 h-3 rounded-full" style="background:${s.color}"></span>
         <div class="flex-1">
           <div class="font-medium">${s.name}</div>
           <div class="text-xs text-slate-500">ออม/เดือน ${fmt.format(Math.round(s.monthly))} · APY ${s.apy}% · ${s.years} ปี</div>
         </div>
         <label class="text-xs text-slate-600 flex items-center gap-2">
-          <input type="checkbox" ${s.hidden?'' : 'checked'} data-idx="${idx}" class="toggleScenario"> แสดง
+          <input type="checkbox" ${s.hidden ? '' : 'checked'} data-idx="${idx}" class="toggleScenario"> แสดง
         </label>
         <button data-idx="${idx}" class="delScenario px-3 py-1 text-xs rounded-lg border border-slate-300 hover:bg-slate-100">ลบ</button>
       `;
-      els.scenarioList.appendChild(li);
-    });
+        els.scenarioList.appendChild(li);
+      });
 
-    // bind events
-    els.scenarioList.querySelectorAll('.delScenario').forEach(btn => btn.onclick = e => {
-      const i = +e.currentTarget.dataset.idx;
-      state.scenarios.splice(i,1);
-      updateAll();
-    });
-    els.scenarioList.querySelectorAll('.toggleScenario').forEach(chk => chk.onchange = e => {
-      const i = +e.currentTarget.dataset.idx;
-      state.scenarios[i].hidden = !e.currentTarget.checked;
-      refreshChart();
-    });
-  }
+      // bind events
+      els.scenarioList.querySelectorAll('.delScenario').forEach(btn => btn.onclick = e => {
+        const i = +e.currentTarget.dataset.idx;
+        state.scenarios.splice(i, 1);
+        updateAll();
+      });
+      els.scenarioList.querySelectorAll('.toggleScenario').forEach(chk => chk.onchange = e => {
+        const i = +e.currentTarget.dataset.idx;
+        state.scenarios[i].hidden = !e.currentTarget.checked;
+        refreshChart();
+      });
+    }
 
-  function renderSummary(){
-    const goal = +els.goal.value || 0;
-    const infl = +els.inflation.value || 0;
-    els.summaryBody.innerHTML = '';
-    state.scenarios.forEach(s => {
-      const realSeries = adjustInflation(s.series, infl);
-      const sumContrib = s.monthly * s.months;
-      const last = s.series[s.series.length-1];
-      const lastReal = realSeries[realSeries.length-1];
-      const mGoal = monthsToGoal(s.series, goal);
-      const tr = document.createElement('tr');
-      tr.className = 'border-t border-slate-100';
-      tr.innerHTML = `
+    function renderSummary() {
+      const goal = +els.goal.value || 0;
+      const infl = +els.inflation.value || 0;
+      els.summaryBody.innerHTML = '';
+      state.scenarios.forEach(s => {
+        const realSeries = adjustInflation(s.series, infl);
+        const sumContrib = s.monthly * s.months;
+        const last = s.series[s.series.length - 1];
+        const lastReal = realSeries[realSeries.length - 1];
+        const mGoal = monthsToGoal(s.series, goal);
+        const tr = document.createElement('tr');
+        tr.className = 'border-t border-slate-100';
+        tr.innerHTML = `
         <td class="py-2 pr-4">${s.name}</td>
         <td class="py-2 pr-4">${toBaht(s.monthly)}</td>
         <td class="py-2 pr-4">${toBaht(sumContrib)}</td>
         <td class="py-2 pr-4">${toBaht(last)}</td>
         <td class="py-2 pr-4">${toBaht(lastReal)}</td>
-        <td class="py-2 pr-4">${goal>0 ? (mGoal!==null ? `${mGoal} เดือน` : 'ยังไม่ถึง') : '-'}</td>
+        <td class="py-2 pr-4">${goal > 0 ? (mGoal !== null ? `${mGoal} เดือน` : 'ยังไม่ถึง') : '-'}</td>
       `;
-      els.summaryBody.appendChild(tr);
-    });
-  }
-
-  function updateAll(){
-    // recompute series for each scenario
-    const initial = +els.initial.value || 0;
-    state.scenarios.forEach(s => {
-      s.series = simulate({ initial, monthly: s.monthly, apy: s.apy, months: s.months });
-    });
-    refreshChart();
-    renderScenarioList();
-    renderSummary();
-    saveLocal();
-  }
-
-  // ===== Add Scenario =====
-  function addScenarioFromForm(){
-    const name = (els.scName.value || '').trim() || `เส้นทาง ${state.scenarios.length+1}`;
-    const income = +els.income.value || 0;
-    const expense = +els.expense.value || 0;
-    const monthly = +(els.contrib.value || (income - expense)) || 0;
-    const apy = +els.apy.value || 0;
-    const years = clamp(+els.years.value || 1, 1, 60);
-    const months = years * 12;
-    const color = randColor();
-
-    const initial = +els.initial.value || 0;
-    const series = simulate({ initial, monthly, apy, months });
-
-    state.scenarios.push({ name, monthly, apy, years, months, color, series });
-    // clear name only for convenience
-    els.scName.value = '';
-    updateAll();
-  }
-
-  // Presets
-  function addPresets(){
-    const presets = [
-      { name: 'ประหยัด', income: 30000, expense: 27000, apy: 3.5, years: 3 },
-      { name: 'สมดุล',   income: 30000, expense: 24000, apy: 6.0, years: 5 },
-      { name: 'รุก',     income: 30000, expense: 19500, apy: 9.0, years: 7 },
-    ];
-    presets.forEach(p => {
-      els.scName.value = p.name;
-      els.income.value = p.income;
-      els.expense.value = p.expense;
-      els.contrib.value = '';
-      els.apy.value = p.apy;
-      els.years.value = p.years;
-      addScenarioFromForm();
-    });
-  }
-
-  // Export CSV (all visible series)
-  function exportCsv(){
-    if(state.scenarios.length === 0) return;
-    const monthsMax = Math.max(0, ...state.scenarios.map(s => s.months));
-    const header = ['เดือน', ...state.scenarios.map(s => s.name)].join(',');
-    const rows = [header];
-    for(let m=0; m<=monthsMax; m++){
-      const row = [m];
-      state.scenarios.forEach(s => row.push(s.series[m] ?? ''));
-      rows.push(row.join(','));
-    }
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'growth_scenarios.csv'; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // Local storage
-  function saveLocal(){
-    const data = {
-      initial: els.initial.value,
-      goal: els.goal.value,
-      inflation: els.inflation.value,
-      scenarios: state.scenarios.map(({name, monthly, apy, years, color}) => ({name, monthly, apy, years, color}))
-    };
-    localStorage.setItem('mvp-money-planner', JSON.stringify(data));
-  }
-
-  function restoreLocal(){
-    const raw = localStorage.getItem('mvp-money-planner');
-    if(!raw) return;
-    try{
-      const data = JSON.parse(raw);
-      els.initial.value = data.initial ?? els.initial.value;
-      els.goal.value = data.goal ?? '';
-      els.inflation.value = data.inflation ?? els.inflation.value;
-      (data.scenarios || []).forEach(s => {
-        const months = (s.years || 1) * 12;
-        const series = simulate({ initial: +els.initial.value || 0, monthly: s.monthly, apy: s.apy, months });
-        state.scenarios.push({ ...s, months, series });
+        els.summaryBody.appendChild(tr);
       });
-    }catch(e){ console.warn('restore failed', e); }
-  }
+    }
 
-  // Goal calculator button
-  els.goalCalcBtn.onclick = () => {
-    const goal = +els.goal.value || 0;
-    if(goal <= 0){ els.goalCalcOut.textContent = 'ใส่เป้าหมายเงินก่อน'; return; }
-    const years = +els.years.value || 5;
-    const apy = +els.apy.value || 0;
-    const months = years * 12;
-    const needed = requiredMonthlyForGoal({ initial: +els.initial.value||0, apy, months, goal });
-    els.goalCalcOut.textContent = `หากต้องการถึงเป้าใน ${years} ปี (APY ${apy}%) ต้องออมอย่างน้อย ~ ${toBaht(needed)} ต่อเดือน`;
-  };
+    function updateAll() {
+      // recompute series for each scenario
+      const initial = +els.initial.value || 0;
+      state.scenarios.forEach(s => {
+        s.series = simulate({ initial, monthly: s.monthly, apy: s.apy, months: s.months });
+      });
+      refreshChart();
+      renderScenarioList();
+      renderSummary();
+      saveLocal();
+    }
 
-  // Bind UI
-  els.addScenarioBtn.onclick = addScenarioFromForm;
-  els.addPresetBtn.onclick = addPresets;
-  els.exportCsvBtn.onclick = exportCsv;
-  els.saveBtn.onclick = saveLocal;
-  els.resetBtn.onclick = () => { if(confirm('ล้างข้อมูลทั้งหมด?')){ localStorage.removeItem('mvp-money-planner'); location.reload(); } };
+    // ===== Add Scenario =====
+    function addScenarioFromForm() {
+      const name = (els.scName.value || '').trim() || `เส้นทาง ${state.scenarios.length + 1}`;
+      const income = +els.income.value || 0;
+      const expense = +els.expense.value || 0;
+      const monthly = +(els.contrib.value || (income - expense)) || 0;
+      const apy = +els.apy.value || 0;
+      const years = clamp(+els.years.value || 1, 1, 60);
+      const months = years * 12;
+      const color = randColor();
 
-  // Refresh on base change
-  ['initial','goal','inflation'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => updateAll());
-  });
+      const initial = +els.initial.value || 0;
+      const series = simulate({ initial, monthly, apy, months });
 
-  // Init
-  restoreLocal();
-  updateAll();
-</script>
+      state.scenarios.push({ name, monthly, apy, years, months, color, series });
+      // clear name only for convenience
+      els.scName.value = '';
+      updateAll();
+    }
+
+    // Presets
+    function addPresets() {
+      const presets = [
+        { name: 'ประหยัด', income: 30000, expense: 27000, apy: 3.5, years: 3 },
+        { name: 'สมดุล', income: 30000, expense: 24000, apy: 6.0, years: 5 },
+        { name: 'รุก', income: 30000, expense: 19500, apy: 9.0, years: 7 },
+      ];
+      presets.forEach(p => {
+        els.scName.value = p.name;
+        els.income.value = p.income;
+        els.expense.value = p.expense;
+        els.contrib.value = '';
+        els.apy.value = p.apy;
+        els.years.value = p.years;
+        addScenarioFromForm();
+      });
+    }
+
+    // Export CSV (all visible series)
+    function exportCsv() {
+      if (state.scenarios.length === 0) return;
+      const monthsMax = Math.max(0, ...state.scenarios.map(s => s.months));
+      const header = ['เดือน', ...state.scenarios.map(s => s.name)].join(',');
+      const rows = [header];
+      for (let m = 0; m <= monthsMax; m++) {
+        const row = [m];
+        state.scenarios.forEach(s => row.push(s.series[m] ?? ''));
+        rows.push(row.join(','));
+      }
+      const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'growth_scenarios.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Local storage
+    function saveLocal() {
+      const data = {
+        initial: els.initial.value,
+        goal: els.goal.value,
+        inflation: els.inflation.value,
+        scenarios: state.scenarios.map(({ name, monthly, apy, years, color }) => ({ name, monthly, apy, years, color }))
+      };
+      localStorage.setItem('mvp-money-planner', JSON.stringify(data));
+    }
+
+    function restoreLocal() {
+      const raw = localStorage.getItem('mvp-money-planner');
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        els.initial.value = data.initial ?? els.initial.value;
+        els.goal.value = data.goal ?? '';
+        els.inflation.value = data.inflation ?? els.inflation.value;
+        (data.scenarios || []).forEach(s => {
+          const months = (s.years || 1) * 12;
+          const series = simulate({ initial: +els.initial.value || 0, monthly: s.monthly, apy: s.apy, months });
+          state.scenarios.push({ ...s, months, series });
+        });
+      } catch (e) { console.warn('restore failed', e); }
+    }
+
+    // Goal calculator button
+    els.goalCalcBtn.onclick = () => {
+      const goal = +els.goal.value || 0;
+      if (goal <= 0) { els.goalCalcOut.textContent = 'ใส่เป้าหมายเงินก่อน'; return; }
+      const years = +els.years.value || 5;
+      const apy = +els.apy.value || 0;
+      const months = years * 12;
+      const needed = requiredMonthlyForGoal({ initial: +els.initial.value || 0, apy, months, goal });
+      els.goalCalcOut.textContent = `หากต้องการถึงเป้าใน ${years} ปี (APY ${apy}%) ต้องออมอย่างน้อย ~ ${toBaht(needed)} ต่อเดือน`;
+    };
+
+    // Bind UI
+    els.addScenarioBtn.onclick = addScenarioFromForm;
+    els.addPresetBtn.onclick = addPresets;
+    els.exportCsvBtn.onclick = exportCsv;
+    els.saveBtn.onclick = saveLocal;
+    els.resetBtn.onclick = () => { if (confirm('ล้างข้อมูลทั้งหมด?')) { localStorage.removeItem('mvp-money-planner'); location.reload(); } };
+
+    // Refresh on base change
+    ['initial', 'goal', 'inflation'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => updateAll());
+    });
+
+    // Init
+    restoreLocal();
+    updateAll();
+  </script>
 </body>
+
 </html>

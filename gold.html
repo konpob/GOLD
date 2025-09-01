@@ -1,458 +1,648 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เงินโต Planner – MVP</title>
-  <!-- Tailwind Play CDN -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Financial Coach System</title>
+  <meta name="description" content="ระบบโค้ชการเงินอัจฉริยะ: วางเป้าหมาย คำนวณเส้นทาง ลงทุนอย่างมีแผน" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Noto Sans Thai", "sans-serif"] },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b'
+            },
+            accent: {
+              500: '#f59e0b',
+              600: '#d97706'
+            }
+          },
           boxShadow: {
-            soft: "0 10px 25px -15px rgba(0,0,0,.25)",
+            soft: '0 10px 30px rgba(2,6,23,0.08)'
           }
         }
       }
     }
   </script>
-  <!-- Chart.js for line chart -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Scrollbars */
-    ::-webkit-scrollbar { height: 8px; width: 8px; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    html, body { scroll-behavior: smooth; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased">
-  <header class="sticky top-0 z-30 backdrop-blur bg-white/80 border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-2xl bg-indigo-600/90 text-white grid place-items-center shadow-soft">฿</div>
-      <div>
-        <h1 class="text-lg font-semibold leading-tight">เงินโต Planner – MVP</h1>
-        <p class="text-xs text-slate-500">จำลองเส้นทางการเติบโตของเงิน · เปรียบเทียบหลายเส้นทาง · ระยะเวลาแตกต่างกัน</p>
-      </div>
-      <div class="ml-auto flex gap-2">
-        <button id="saveBtn" class="px-3 py-1.5 text-sm rounded-xl bg-slate-900 text-white hover:bg-slate-800">บันทึกข้อมูล</button>
-        <button id="resetBtn" class="px-3 py-1.5 text-sm rounded-xl bg-white border border-slate-300 hover:bg-slate-100">รีเซ็ต</button>
-      </div>
+<body class="bg-gradient-to-b from-primary-50 via-white to-white text-slate-800">
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-white/70 border-b border-slate-200/60">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2 font-extrabold tracking-tight text-primary-700">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M11.7 2.3a1 1 0 0 1 1.6 0l8 10a1 1 0 0 1-.8 1.6H16v6a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-6H2.5a1 1 0 0 1-.8-1.6l10-10Z"/></svg>
+        <span>Smart Financial Coach</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 text-[15px]">
+        <a href="#about" class="hover:text-primary-700">เกี่ยวกับระบบ</a>
+        <a href="#features" class="hover:text-primary-700">ฟีเจอร์</a>
+        <a href="#fits" class="hover:text-primary-700">Problem/Product/Business Fit</a>
+        <a href="#planner" class="hover:text-primary-700">วางแผนการเงิน</a>
+        <a href="#team" class="hover:text-primary-700">ทีมงาน</a>
+        <a href="#present" class="hover:text-primary-700">สไลด์</a>
+        <a href="/index.html" class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow-soft hover:bg-primary-700 transition">ระบบคำนวน</a>
+      </nav>
+      </nav>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <!-- LEFT: controls -->
-    <section class="lg:col-span-5 space-y-6">
-      <!-- Base settings -->
-      <div class="bg-white rounded-2xl shadow-soft border border-slate-200 p-5">
-        <h2 class="font-semibold text-slate-800">ฐานข้อมูล</h2>
-        <p class="text-sm text-slate-500 mb-4">ตั้งค่าพื้นฐานที่ใช้ร่วมกันทุกเส้นทาง</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">เงินตั้งต้น (บาท)</span>
-            <input id="initial" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="10000" min="0"/>
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">เป้าหมายเงิน (บาท) <span class="text-slate-400">(ไม่บังคับ)</span></span>
-            <input id="goal" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="เช่น 500000" />
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">เงินเฟ้อต่อปี (%)</span>
-            <input id="inflation" type="number" step="0.1" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="2.0" />
-          </label>
-          <div class="text-sm flex items-end">
-            <button id="goalCalcBtn" class="mt-6 w-full rounded-xl border border-indigo-200 text-indigo-700 px-3 py-2 hover:bg-indigo-50">คำนวณเงินออม/เดือนเพื่อถึงเป้า</button>
+  <!-- Hero -->
+  <section id="top" class="relative overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-tr from-primary-100 via-white to-primary-50"></div>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary-700 bg-primary-100 px-3 py-1 rounded-full">รุ่นต้นแบบ • Lean MVP</span>
+        <h1 class="mt-5 text-4xl md:text-5xl font-extrabold leading-tight text-slate-900">โค้ชการเงินอัจฉริยะ<br class="hidden sm:block"/>กำหนดเป้าหมาย ชี้เส้นทาง และคำนวณเวลา</h1>
+        <p class="mt-5 text-lg text-slate-600 max-w-xl">ระบบที่จะช่วยคุณ <span class="font-semibold">วางเป้าหมายการเงิน</span> อย่างมีแผน โดยอธิบายชัดเจนว่าคุณต้องทำอะไร ปรับพฤติกรรมอย่างไร และจะใช้เวลาเท่าไหร่ในการไปถึงเป้าหมายนั้น</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#planner" class="inline-flex items-center px-5 py-3 rounded-xl bg-primary-600 text-white shadow-soft hover:bg-primary-700 transition">ทดลองวางแผนทันที</a>
+          <a href="#about" class="inline-flex items-center px-5 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">เรียนรู้เพิ่มเติม</a>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="absolute -inset-6 bg-gradient-to-br from-primary-100 to-white rounded-3xl blur-2xl"></div>
+        <div class="relative p-6 rounded-3xl bg-white shadow-soft border border-slate-200">
+          <h3 class="text-xl font-bold">ภาพรวมการเงินของคุณ</h3>
+          <p class="mt-1 text-sm text-slate-500">สรุปสถานการณ์การเงินปัจจุบัน ก่อนเริ่มวางแผน</p>
+          <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50">
+              <div class="text-slate-500">รายได้/เดือน</div>
+              <div class="text-2xl font-bold" id="cardIncome">฿15,000</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+              <div class="text-slate-500">ค่าใช้จ่าย/เดือน</div>
+              <div class="text-2xl font-bold" id="cardExpense">฿10,000</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+              <div class="text-slate-500">ลงทุน/เดือน</div>
+              <div class="text-2xl font-bold" id="cardInvest">฿5,000</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+              <div class="text-slate-500">ผลตอบแทนคาดหวัง/ปี</div>
+              <div class="text-2xl font-bold" id="cardReturn">8%</div>
+            </div>
+          </div>
+          <div class="mt-4 text-xs text-slate-500">*ตัวเลขตัวอย่างเพื่อสาธิตเท่านั้น</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="py-16 bg-slate-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-8 items-center">
+      <div>
+        <h2 class="text-3xl font-extrabold text-slate-900">เกี่ยวกับระบบนี้</h2>
+        <p class="mt-3 text-slate-600">ระบบโค้ชการเงินอัจฉริยะถูกออกแบบมาเพื่อช่วยให้คนทั่วไปที่ไม่เคยมีความรู้ด้านการลงทุนหรือการจัดการการเงิน สามารถสร้าง <strong>แผนการเงินส่วนบุคคล</strong> ได้ด้วยตนเอง โดยระบบจะอธิบายทีละขั้นตอน:</p>
+        <ul class="mt-4 list-disc list-inside text-slate-600 space-y-2">
+          <li>รวบรวมข้อมูลพื้นฐาน: รายได้, ค่าใช้จ่าย, หนี้สิน, เงินออม</li>
+          <li>ตั้งเป้าหมายที่ชัดเจน: เช่น เก็บเงิน 20 ล้านใน 20 ปี</li>
+          <li>สร้างเส้นทางการเงิน: เลือกจากพนักงาน, ฟรีแลนซ์, หรือผู้ประกอบการ</li>
+          <li>เปรียบเทียบเส้นทาง: ข้อดี, ข้อเสีย, และความเสี่ยงที่อาจเจอ</li>
+          <li>คำนวณเวลาที่ต้องใช้ และการลงทุนที่เหมาะสม</li>
+        </ul>
+        <p class="mt-4 text-slate-600">ระบบนี้ไม่เพียงแต่ให้ตัวเลข แต่ยังอธิบายว่า <strong>คุณกำลังทำอะไร และทำไปทำไม</strong> เพื่อให้ผู้ใช้เข้าใจจริง ๆ</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+        <h3 class="text-xl font-bold">ประโยชน์ที่คุณจะได้รับ</h3>
+        <ul class="mt-3 list-disc list-inside text-slate-600 space-y-2 text-sm">
+          <li>รู้สถานะการเงินของตัวเองทันที</li>
+          <li>เห็นทางเลือกหลายแบบ พร้อมผลลัพธ์ที่แตกต่าง</li>
+          <li>เข้าใจความเสี่ยงก่อนตัดสินใจ</li>
+          <li>มีโค้ชส่วนตัวที่อธิบายชัดเจนแบบ Step-by-Step</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl font-extrabold text-slate-900">ฟีเจอร์หลัก</h2>
+        <p class="mt-3 text-slate-600">เริ่มจากการเงินและการลงทุน ก่อนขยายไปสู่เป้าหมายชีวิตด้านอื่น</p>
+      </div>
+      <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-primary-700 font-semibold">กำหนดเป้าหมาย</div>
+          <p class="mt-2 text-sm text-slate-600">ตั้งเป้าหมายจำนวนเงินและเวลา พร้อมติดตามความคืบหน้า</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-primary-700 font-semibold">วิเคราะห์รายรับ–รายจ่าย</div>
+          <p class="mt-2 text-sm text-slate-600">เห็นภาพเงินคงเหลือ ออม และเงินที่ลงทุนได้จริง</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-primary-700 font-semibold">จำลองหลายเส้นทาง</div>
+          <p class="mt-2 text-sm text-slate-600">พนักงาน/ฟรีแลนซ์/ผู้ประกอบการ เลือกแนวทางที่เหมาะกับคุณ</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-primary-700 font-semibold">คำแนะนำ & ความเสี่ยง</div>
+          <p class="mt-2 text-sm text-slate-600">สรุปข้อดี–ข้อเสีย–ความเสี่ยง เพื่อการตัดสินใจแบบมีข้อมูล</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fits -->
+  <section id="fits" class="py-16 bg-slate-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <h3 class="text-xl font-bold">Problem – Solution Fit</h3>
+          <ul class="mt-3 space-y-2 text-sm text-slate-600 list-disc list-inside">
+            <li>ปัญหา: คนวางแผนการเงินไม่เป็น ไม่รู้จะลงทุนเท่าไหร่</li>
+            <li>วิธีแก้: ระบบคำนวณเป้าหมาย ออม/ลงทุนต่อเดือน และเวลาที่ต้องใช้</li>
+            <li>ผลลัพธ์: เห็นทางไปสู่เป้าหมายอย่างชัดเจน</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <h3 class="text-xl font-bold">Product – Market Fit</h3>
+          <ul class="mt-3 space-y-2 text-sm text-slate-600 list-disc list-inside">
+            <li>สินค้า: เว็บ/แอประบบโค้ชการเงิน</li>
+            <li>ตลาด: พนักงานประจำ ฟรีแลนซ์ ผู้ประกอบการ</li>
+            <li>Fit: ความต้องการวางแผนการเงินมีสูงและต่อเนื่อง</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <h3 class="text-xl font-bold">Business – Market Fit</h3>
+          <ul class="mt-3 space-y-2 text-sm text-slate-600 list-disc list-inside">
+            <li>โมเดลรายได้: ค่าสมาชิก (SaaS) + Affiliate/Commission</li>
+            <li>ขยายผล: คอร์ส, ที่ปรึกษา, เครื่องมือพรีเมียม</li>
+            <li>ความยั่งยืน: LTV สูง, ต้นทุนแปรผันต่ำ</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Planner / Calculator -->
+  <section id="planner" class="py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl font-extrabold text-slate-900">วางแผนการเงินแบบโต้ตอบ</h2>
+        <p class="mt-3 text-slate-600">ใส่เป้าหมายและสมมติฐาน ระบบจะคำนวณว่า "ต้องลงทุนต่อเดือนเท่าไหร่" และ "ถ้าลงทุนเท่านี้จะได้เท่าไหร่"</p>
+      </div>
+
+      <div class="mt-8 grid lg:grid-cols-3 gap-6">
+        <!-- Inputs -->
+        <div class="lg:col-span-2 p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="block">
+              <span class="text-sm text-slate-600">เป้าหมาย (บาท)</span>
+              <input id="goal" type="number" value="20000000" class="mt-1 w-full rounded-xl border-slate-300 focus:border-primary-600 focus:ring-primary-600" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-slate-600">ระยะเวลา (ปี)</span>
+              <input id="years" type="number" value="20" min="1" class="mt-1 w-full rounded-xl border-slate-300 focus:border-primary-600 focus:ring-primary-600" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-slate-600">ผลตอบแทนคาดหวังต่อปี (%)</span>
+              <input id="annualReturn" type="number" value="8" step="0.1" class="mt-1 w-full rounded-xl border-slate-300 focus:border-primary-600 focus:ring-primary-600" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-slate-600">ลงทุนปัจจุบันต่อเดือน (บาท)</span>
+              <input id="monthlyInvest" type="number" value="5000" class="mt-1 w-full rounded-xl border-slate-300 focus:border-primary-600 focus:ring-primary-600" />
+            </label>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button id="calcBtn" class="inline-flex items-center px-5 py-2.5 rounded-xl bg-primary-600 text-white hover:bg-primary-700">คำนวณ</button>
+            <div class="text-xs text-slate-500">*การคำนวณเป็นการจำลอง ไม่ใช่คำแนะนำการลงทุน</div>
+          </div>
+
+          <div class="mt-6 grid sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50">
+              <div class="text-slate-500 text-sm">เงินสะสมที่คาดว่าจะได้</div>
+              <div id="projected" class="text-2xl font-bold">฿—</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+              <div class="text-slate-500 text-sm">ต้องลงทุนต่อเดือนเพื่อให้ถึงเป้า</div>
+              <div id="required" class="text-2xl font-bold">฿—</div>
+            </div>
           </div>
         </div>
-        <p id="goalCalcOut" class="mt-3 text-sm text-indigo-700"></p>
-      </div>
 
-      <!-- Scenario form -->
-      <div class="bg-white rounded-2xl shadow-soft border border-slate-200 p-5">
-        <h2 class="font-semibold text-slate-800">เพิ่มเส้นทาง (Scenario)</h2>
-        <p class="text-sm text-slate-500 mb-4">ระบุรายได้ รายจ่าย ผลตอบแทน และระยะเวลา</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">ชื่อเส้นทาง</span>
-            <input id="scName" type="text" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="เช่น ประหยัด/สมดุล/รุก" />
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">รายได้ต่อเดือน (บาท)</span>
-            <input id="income" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="30000" min="0" />
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">รายจ่ายต่อเดือน (บาท)</span>
-            <input id="expense" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="22000" min="0" />
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">เงินลงทุน/ออมต่อเดือน (บาท)</span>
-            <input id="contrib" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="เว้นว่างเพื่อใช้=รายได้-รายจ่าย" />
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">ผลตอบแทนต่อปี (%)</span>
-            <input id="apy" type="number" step="0.1" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="6" />
-          </label>
-          <label class="text-sm">
-            <span class="block text-slate-600 mb-1">ระยะเวลา (ปี)</span>
-            <input id="years" type="number" class="w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" value="5" min="1" />
-          </label>
-        </div>
-        <div class="flex items-center gap-2 mt-4">
-          <button id="addScenarioBtn" class="rounded-xl bg-indigo-600 text-white px-4 py-2 hover:bg-indigo-700">เพิ่มเส้นทาง</button>
-          <button id="addPresetBtn" class="rounded-xl bg-white border border-slate-300 px-4 py-2 hover:bg-slate-100">เพิ่มตัวอย่าง 3 แบบ</button>
-        </div>
-      </div>
-
-      <!-- Scenario list -->
-      <div class="bg-white rounded-2xl shadow-soft border border-slate-200 p-5">
-        <h2 class="font-semibold text-slate-800 mb-2">เส้นทางที่เลือก</h2>
-        <ul id="scenarioList" class="space-y-3"></ul>
-      </div>
-
-      <p class="text-xs text-slate-500">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของคุณ (localStorage) เท่านั้น</p>
-    </section>
-
-    <!-- RIGHT: chart + summary -->
-    <section class="lg:col-span-7 space-y-6">
-      <div class="bg-white rounded-2xl shadow-soft border border-slate-200 p-5">
-        <div class="flex items-center gap-3 mb-4">
-          <h2 class="font-semibold text-slate-800">กราฟเงินเติบโต</h2>
-          <span class="text-xs text-slate-500">กดชื่อเส้นทางเพื่อซ่อน/แสดงในคำอธิบายกราฟ</span>
-          <div class="ml-auto flex items-center gap-2">
-            <button id="exportCsvBtn" class="px-3 py-1.5 text-sm rounded-xl bg-white border border-slate-300 hover:bg-slate-100">ส่งออก CSV</button>
+        <!-- Scenarios -->
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <h4 class="font-bold">ตัวอย่างเส้นทางรายได้</h4>
+          <div class="mt-4 space-y-3">
+            <button data-income="15000" data-expense="10000" data-invest="5000" class="scenario w-full px-4 py-2 rounded-xl border hover:bg-slate-50 text-left">
+              พนักงานเงินเดือน 15,000 → เหลือลงทุน 5,000
+            </button>
+            <button data-income="60000" data-expense="40000" data-invest="20000" class="scenario w-full px-4 py-2 rounded-xl border hover:bg-slate-50 text-left">
+              ฟรีแลนซ์ 60,000 → เหลือลงทุน 20,000
+            </button>
+            <button data-income="120000" data-expense="70000" data-invest="50000" class="scenario w-full px-4 py-2 rounded-xl border hover:bg-slate-50 text-left">
+              ผู้ประกอบการ 120,000 → เหลือลงทุน 50,000
+            </button>
+          </div>
+          <div class="mt-6 text-sm text-slate-600">
+            <div>รายได้/เดือน: <span id="scIncome" class="font-semibold">฿15,000</span></div>
+            <div>ค่าใช้จ่าย/เดือน: <span id="scExpense" class="font-semibold">฿10,000</span></div>
+            <div>ลงทุน/เดือน: <span id="scInvest" class="font-semibold">฿5,000</span></div>
           </div>
         </div>
-        <canvas id="chart" height="280"></canvas>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-soft border border-slate-200 p-5">
-        <h2 class="font-semibold text-slate-800 mb-3">สรุปผลลัพธ์</h2>
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm">
-            <thead>
-              <tr class="text-left text-slate-600">
-                <th class="py-2 pr-4">เส้นทาง</th>
-                <th class="py-2 pr-4">เงินออม/เดือน</th>
-                <th class="py-2 pr-4">รวมเงินออม</th>
-                <th class="py-2 pr-4">มูลค่าอนาคต</th>
-                <th class="py-2 pr-4">มูลค่าแท้จริง* </th>
-                <th class="py-2 pr-4">ถึงเป้าหมาย?</th>
-              </tr>
-            </thead>
-            <tbody id="summaryBody"></tbody>
-          </table>
+      <div class="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+        ข้อจำกัด: ผลตอบแทนในอนาคตไม่แน่นอน การคำนวณนี้เพื่อการศึกษาเท่านั้น โปรดประเมินความเสี่ยงก่อนตัดสินใจลงทุน
+      </div>
+    </div>
+  </section>
+
+  <!-- Presentation / Slides -->
+  <section id="present" class="py-16 bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-3xl font-extrabold text-slate-900">สไลด์นำเสนอ</h2>
+          <p class="mt-2 text-slate-600">โครงสร้างสไลด์ตามที่เตรียมบรรยาย สามารถเปิดโหมดสไลด์และใช้ปุ่มลูกศรซ้าย/ขวาเพื่อเปลี่ยนหน้า</p>
         </div>
-        <p class="text-xs text-slate-500 mt-2">*หักเงินเฟ้อด้วยอัตราที่ตั้งไว้ เพื่อให้เห็นมูลค่าจริงในปัจจุบัน</p>
+        <div class="flex items-center gap-2">
+          <button id="btnSlideMode" class="px-4 py-2 rounded-xl border hover:bg-slate-50">เปิดโหมดสไลด์</button>
+          <button id="btnOutlineMode" class="px-4 py-2 rounded-xl border hover:bg-slate-50 hidden">ปิดโหมดสไลด์</button>
+          <button id="btnPrint" class="px-4 py-2 rounded-xl bg-primary-600 text-white hover:bg-primary-700">พิมพ์/บันทึก PDF</button>
+        </div>
       </div>
-    </section>
-  </main>
 
-  <footer class="max-w-7xl mx-auto px-4 pb-10 text-xs text-slate-500">
-    เคล็ดลับ: ทดลองแก้ไขรายได้/รายจ่าย/ผลตอบแทน แล้วดูความต่างของเส้นทาง และระยะเวลาที่ถึงเป้าหมาย
+      <!-- Deck (single-slide view) -->
+      <div id="deck" class="mt-8 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <button id="prevSlide" class="px-3 py-2 rounded-lg border hover:bg-slate-50">ก่อนหน้า</button>
+          <div class="text-sm text-slate-600"><span id="slideTitle" class="font-semibold"></span> • <span id="slideCounter">1/10</span></div>
+          <button id="nextSlide" class="px-3 py-2 rounded-lg border hover:bg-slate-50">ถัดไป</button>
+        </div>
+        <article class="rounded-3xl bg-gradient-to-br from-white to-primary-50 border border-slate-200 shadow-soft p-8 md:p-12 min-h-[380px] flex items-center">
+          <div id="slideBody" class="prose max-w-none prose-ul:list-inside prose-li:marker:text-primary-700">
+            <!-- dynamic content injected by JS -->
+          </div>
+        </article>
+        <div class="mt-3 text-xs text-slate-500">เคล็ดลับ: ใช้ปุ่มลูกศร ◀ ▶ หรือกดเลข 1–0 เพื่อกระโดดไปสไลด์ที่ต้องการ</div>
+      </div>
+
+      <!-- Outline (all slides) -->
+      <div id="outline" class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Slide cards -->
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="0">
+          <h3 class="font-bold">Slide 1 – Title</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>ระบบโค้ชการเงินอัจฉริยะ (Smart Financial Coach System)</li>
+            <li>ผู้พัฒนา: <strong>Konpob</strong> – CEO</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="1">
+          <h3 class="font-bold">Slide 2 – Problem</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>ไม่รู้วิธีวางแผนการเงิน / ใช้จ่ายเกินรายได้ / ออมไม่ถึงเป้า</li>
+            <li>ตัวอย่าง: รายได้ 15,000 → ใช้ 10,000 → ลงทุน 5,000 → ไม่ถึง 20 ล้านใน 20 ปี</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="2">
+          <h3 class="font-bold">Slide 3 – Solution</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>วิเคราะห์รายได้–ค่าใช้จ่าย–การลงทุน</li>
+            <li>ตั้งเป้าหมาย/จำลองเส้นทาง (พนักงาน/ฟรีแลนซ์/ธุรกิจ)</li>
+            <li>ข้อดี–ข้อเสีย–ความเสี่ยง + คำนวณเวลาถึงเป้า</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="3">
+          <h3 class="font-bold">Slide 4 – Problem–Solution Fit</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>ปัญหา: ขาดระบบในการวางแผน</li>
+            <li>วิธีแก้: ระบบคำนวณและแนะนำเส้นทาง</li>
+            <li>ผลลัพธ์: เห็นเป้าหมายชัด + ปรับแผนได้</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="4">
+          <h3 class="font-bold">Slide 5 – Product–Market Fit</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>Product: แอป/เว็บโค้ชการเงิน</li>
+            <li>Market: พนักงาน ฟรีแลนซ์ ผู้ประกอบการ</li>
+            <li>Fit: ความต้องการสูงและต่อเนื่อง</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="5">
+          <h3 class="font-bold">Slide 6 – Business–Market Fit</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>Subscription + Affiliate/Commission</li>
+            <li>ตลาดการเงินโตเร็ว</li>
+            <li>ศักยภาพรายได้ยั่งยืน</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="6">
+          <h3 class="font-bold">Slide 7 – Features</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>วิเคราะห์รายได้–รายจ่าย–หนี้สิน</li>
+            <li>ตั้งเป้าหมาย, สร้างเส้นทาง (ปลอดภัย/เสี่ยงสูง)</li>
+            <li>คำนวณเวลา, คำแนะนำ & ความเสี่ยง, ปรับแผนอัตโนมัติ</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="7">
+          <h3 class="font-bold">Slide 8 – Team</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>CEO: วิสัยทัศน์ กลยุทธ์ ทิศทาง</li>
+            <li>CFO: สูตรคำนวณ การเงิน ความเสี่ยง</li>
+            <li>CMO: การตลาด แบรนด์ การเติบโตผู้ใช้</li>
+            <li>COO: ปฏิบัติการ ระบบ ทีม IT</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="8">
+          <h3 class="font-bold">Slide 9 – Business Plan</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>เริ่มต้นต่ำ: ใช้ความรู้ IT + Marketing</li>
+            <li>Prototype → ทดลองตลาด → SaaS</li>
+            <li>รายได้: ค่าสมาชิก + Affiliate</li>
+          </ul>
+        </article>
+        <article class="slide-card p-6 rounded-2xl bg-white border border-slate-200 shadow-soft" data-idx="9">
+          <h3 class="font-bold">Slide 10 – Vision</h3>
+          <ul class="mt-2 text-sm text-slate-600 list-disc list-inside">
+            <li>ขยายจากการเงิน → Education / Skill / Sport</li>
+            <li>เป้าหมาย: ระบบโค้ชเป้าหมายชีวิตอัจฉริยะ</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section id="team" class="py-16 bg-slate-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl font-extrabold text-slate-900">ทีมบริหาร</h2>
+        <p class="mt-2 text-slate-600">โครงสร้าง C-level ที่ชัดเจน ครอบคลุมกลยุทธ์ การเงิน การตลาด และปฏิบัติการ</p>
+      </div>
+      <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-sm text-slate-500">CEO</div>
+          <div class="font-bold">Konpob Kruemyarat</div>
+          <ul class="mt-2 text-sm text-slate-600 space-y-1 list-disc list-inside">
+            <li>วิสัยทัศน์ & กลยุทธ์ผลิตภัณฑ์</li>
+            <li>กำกับทิศทางและการทดลองเชิงธุรกิจ</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-sm text-slate-500">CFO</div>
+          <div class="font-bold">การเงิน</div>
+          <ul class="mt-2 text-sm text-slate-600 space-y-1 list-disc list-inside">
+            <li>โมเดลคำนวณทางการเงิน</li>
+            <li>บริหารความเสี่ยง เงินสด และงบประมาณ</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-sm text-slate-500">CMO</div>
+          <div class="font-bold">การตลาด</div>
+          <ul class="mt-2 text-sm text-slate-600 space-y-1 list-disc list-inside">
+            <li>กลยุทธ์การตลาด & แบรนด์</li>
+            <li>การเติบโตของผู้ใช้ (Acquisition/Retention)</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white shadow-soft border border-slate-200">
+          <div class="text-sm text-slate-500">COO</div>
+          <div class="font-bold">รองผู้บริหาร</div>
+          <ul class="mt-2 text-sm text-slate-600 space-y-1 list-disc list-inside">
+            <li>การปฏิบัติการ & คุณภาพระบบ</li>
+            <li>ประสานงานทีมพัฒนา/ซัพพอร์ต</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta" class="py-20">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">พร้อมเริ่มวางแผนสู่เป้าหมายแล้วหรือยัง?</h2>
+      <p class="mt-3 text-slate-600">เข้าทดลองเวอร์ชันต้นแบบ และรับคำแนะนำแบบส่วนตัวจากระบบโค้ชการเงินอัจฉริยะ</p>
+      <div class="mt-6 flex items-center justify-center gap-3">
+        <a href="#planner" class="inline-flex items-center px-6 py-3 rounded-xl bg-primary-600 text-white shadow-soft hover:bg-primary-700">เริ่มทดลอง</a>
+        <a href="#present" class="inline-flex items-center px-6 py-3 rounded-xl border border-slate-300 hover:bg-slate-50">เปิดดูสไลด์</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-200 py-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-sm text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>© <span id="y"></span> Smart Financial Coach • เพื่อการศึกษาเท่านั้น</div>
+      <div class="flex items-center gap-4">
+        <a class="hover:text-slate-700" href="#features">ฟีเจอร์</a>
+        <a class="hover:text-slate-700" href="#fits">Fits</a>
+        <a class="hover:text-slate-700" href="#team">ทีมงาน</a>
+      </div>
+    </div>
   </footer>
 
-<script>
-  // ===== Utilities =====
-  const fmt = new Intl.NumberFormat('th-TH');
-  const toBaht = n => (isFinite(n) ? fmt.format(Math.round(n)) + ' ฿' : '-');
-  const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
+  <script>
+    const fmt = (n) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(n);
 
-  // Random pleasant color for datasets
-  function randColor(){
-    const h = Math.floor(Math.random()*360);
-    return `hsl(${h} 80% 45%)`;
-  }
-
-  // Compute growth arrays
-  function simulate({initial, monthly, apy, months}){
-    const i = Math.pow(1 + apy/100, 1/12) - 1; // monthly rate
-    let b = initial;
-    const series = [];
-    for(let m=0; m<=months; m++){
-      series.push(b);
-      // compound then add contribution at end of month
-      b = b * (1 + i) + monthly;
+    function futureValue(monthly, annualRate, years) {
+      const r = (annualRate / 100) / 12; // monthly rate
+      const n = years * 12; // months
+      if (r === 0) return monthly * n; // no growth
+      return monthly * ((Math.pow(1 + r, n) - 1) / r);
     }
-    return series;
-  }
 
-  function adjustInflation(series, infl){
-    const j = Math.pow(1 + infl/100, 1/12) - 1;
-    let factor = 1;
-    return series.map((v, idx) => {
-      if(idx===0) return v;
-      factor *= (1 + j);
-      return v / factor; // convert to real terms
-    });
-  }
-
-  function monthsToGoal(series, goal){
-    if(!goal || goal <= 0) return null;
-    for(let m=0; m<series.length; m++){
-      if(series[m] >= goal) return m;
+    function requiredMonthlyForGoal(goal, annualRate, years) {
+      const r = (annualRate / 100) / 12; const n = years * 12;
+      if (r === 0) return goal / n;
+      return goal * r / (Math.pow(1 + r, n) - 1);
     }
-    return null;
-  }
 
-  // Solve required monthly contribution for goal
-  function requiredMonthlyForGoal({initial, apy, months, goal}){
-    if(!goal || goal <= 0) return null;
-    const r = Math.pow(1 + apy/100, 1/12) - 1;
-    const pow = Math.pow(1 + r, months);
-    if(r === 0){
-      return (goal - initial*pow) / months; // linear case
-    }
-    const c = (goal - initial * pow) * r / (pow - 1);
-    return c > 0 ? c : 0;
-  }
-
-  // ===== State =====
-  const state = {
-    scenarios: [],
-    chart: null,
-  };
-
-  // ===== Elements =====
-  const els = {
-    initial: document.getElementById('initial'),
-    goal: document.getElementById('goal'),
-    inflation: document.getElementById('inflation'),
-
-    scName: document.getElementById('scName'),
-    income: document.getElementById('income'),
-    expense: document.getElementById('expense'),
-    contrib: document.getElementById('contrib'),
-    apy: document.getElementById('apy'),
-    years: document.getElementById('years'),
-
-    scenarioList: document.getElementById('scenarioList'),
-    summaryBody: document.getElementById('summaryBody'),
-
-    exportCsvBtn: document.getElementById('exportCsvBtn'),
-    addScenarioBtn: document.getElementById('addScenarioBtn'),
-    addPresetBtn: document.getElementById('addPresetBtn'),
-    saveBtn: document.getElementById('saveBtn'),
-    resetBtn: document.getElementById('resetBtn'),
-    goalCalcBtn: document.getElementById('goalCalcBtn'),
-    goalCalcOut: document.getElementById('goalCalcOut'),
-  };
-
-  // ===== Chart Init =====
-  const ctx = document.getElementById('chart').getContext('2d');
-  state.chart = new Chart(ctx, {
-    type: 'line',
-    data: { labels: [], datasets: [] },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${toBaht(ctx.parsed.y)}` } }
-      },
-      scales: {
-        x: { title: { display: true, text: 'เดือน' } },
-        y: { title: { display: true, text: 'มูลค่า (บาท)' }, ticks: { callback: v => fmt.format(v) } }
-      },
-      elements: { line: { tension: .18 } }
-    }
-  });
-
-  function refreshChart(){
-    const monthsMax = Math.max(0, ...state.scenarios.map(s => s.months));
-    const labels = Array.from({length: monthsMax+1}, (_,i) => i);
-    state.chart.data.labels = labels;
-    state.chart.data.datasets = state.scenarios.map(s => ({
-      label: s.name,
-      borderColor: s.color,
-      backgroundColor: s.color,
-      data: s.series,
-      pointRadius: 0,
-      borderWidth: 2,
-      fill: false,
-      hidden: s.hidden || false,
-    }));
-    state.chart.update();
-  }
-
-  function renderScenarioList(){
-    els.scenarioList.innerHTML = '';
-    state.scenarios.forEach((s, idx) => {
-      const li = document.createElement('li');
-      li.className = 'p-3 rounded-xl border border-slate-200 flex items-center gap-3';
-      li.innerHTML = `
-        <span class="inline-block w-3 h-3 rounded-full" style="background:${s.color}"></span>
-        <div class="flex-1">
-          <div class="font-medium">${s.name}</div>
-          <div class="text-xs text-slate-500">ออม/เดือน ${fmt.format(Math.round(s.monthly))} · APY ${s.apy}% · ${s.years} ปี</div>
-        </div>
-        <label class="text-xs text-slate-600 flex items-center gap-2">
-          <input type="checkbox" ${s.hidden?'' : 'checked'} data-idx="${idx}" class="toggleScenario"> แสดง
-        </label>
-        <button data-idx="${idx}" class="delScenario px-3 py-1 text-xs rounded-lg border border-slate-300 hover:bg-slate-100">ลบ</button>
-      `;
-      els.scenarioList.appendChild(li);
-    });
-
-    // bind events
-    els.scenarioList.querySelectorAll('.delScenario').forEach(btn => btn.onclick = e => {
-      const i = +e.currentTarget.dataset.idx;
-      state.scenarios.splice(i,1);
-      updateAll();
-    });
-    els.scenarioList.querySelectorAll('.toggleScenario').forEach(chk => chk.onchange = e => {
-      const i = +e.currentTarget.dataset.idx;
-      state.scenarios[i].hidden = !e.currentTarget.checked;
-      refreshChart();
-    });
-  }
-
-  function renderSummary(){
-    const goal = +els.goal.value || 0;
-    const infl = +els.inflation.value || 0;
-    els.summaryBody.innerHTML = '';
-    state.scenarios.forEach(s => {
-      const realSeries = adjustInflation(s.series, infl);
-      const sumContrib = s.monthly * s.months;
-      const last = s.series[s.series.length-1];
-      const lastReal = realSeries[realSeries.length-1];
-      const mGoal = monthsToGoal(s.series, goal);
-      const tr = document.createElement('tr');
-      tr.className = 'border-t border-slate-100';
-      tr.innerHTML = `
-        <td class="py-2 pr-4">${s.name}</td>
-        <td class="py-2 pr-4">${toBaht(s.monthly)}</td>
-        <td class="py-2 pr-4">${toBaht(sumContrib)}</td>
-        <td class="py-2 pr-4">${toBaht(last)}</td>
-        <td class="py-2 pr-4">${toBaht(lastReal)}</td>
-        <td class="py-2 pr-4">${goal>0 ? (mGoal!==null ? `${mGoal} เดือน` : 'ยังไม่ถึง') : '-'}</td>
-      `;
-      els.summaryBody.appendChild(tr);
-    });
-  }
-
-  function updateAll(){
-    // recompute series for each scenario
-    const initial = +els.initial.value || 0;
-    state.scenarios.forEach(s => {
-      s.series = simulate({ initial, monthly: s.monthly, apy: s.apy, months: s.months });
-    });
-    refreshChart();
-    renderScenarioList();
-    renderSummary();
-    saveLocal();
-  }
-
-  // ===== Add Scenario =====
-  function addScenarioFromForm(){
-    const name = (els.scName.value || '').trim() || `เส้นทาง ${state.scenarios.length+1}`;
-    const income = +els.income.value || 0;
-    const expense = +els.expense.value || 0;
-    const monthly = +(els.contrib.value || (income - expense)) || 0;
-    const apy = +els.apy.value || 0;
-    const years = clamp(+els.years.value || 1, 1, 60);
-    const months = years * 12;
-    const color = randColor();
-
-    const initial = +els.initial.value || 0;
-    const series = simulate({ initial, monthly, apy, months });
-
-    state.scenarios.push({ name, monthly, apy, years, months, color, series });
-    // clear name only for convenience
-    els.scName.value = '';
-    updateAll();
-  }
-
-  // Presets
-  function addPresets(){
-    const presets = [
-      { name: 'ประหยัด', income: 30000, expense: 27000, apy: 3.5, years: 3 },
-      { name: 'สมดุล',   income: 30000, expense: 24000, apy: 6.0, years: 5 },
-      { name: 'รุก',     income: 30000, expense: 19500, apy: 9.0, years: 7 },
-    ];
-    presets.forEach(p => {
-      els.scName.value = p.name;
-      els.income.value = p.income;
-      els.expense.value = p.expense;
-      els.contrib.value = '';
-      els.apy.value = p.apy;
-      els.years.value = p.years;
-      addScenarioFromForm();
-    });
-  }
-
-  // Export CSV (all visible series)
-  function exportCsv(){
-    if(state.scenarios.length === 0) return;
-    const monthsMax = Math.max(0, ...state.scenarios.map(s => s.months));
-    const header = ['เดือน', ...state.scenarios.map(s => s.name)].join(',');
-    const rows = [header];
-    for(let m=0; m<=monthsMax; m++){
-      const row = [m];
-      state.scenarios.forEach(s => row.push(s.series[m] ?? ''));
-      rows.push(row.join(','));
-    }
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'growth_scenarios.csv'; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // Local storage
-  function saveLocal(){
-    const data = {
-      initial: els.initial.value,
-      goal: els.goal.value,
-      inflation: els.inflation.value,
-      scenarios: state.scenarios.map(({name, monthly, apy, years, color}) => ({name, monthly, apy, years, color}))
+    // Bind calculator
+    const els = {
+      goal: document.getElementById('goal'),
+      years: document.getElementById('years'),
+      annualReturn: document.getElementById('annualReturn'),
+      monthlyInvest: document.getElementById('monthlyInvest'),
+      projected: document.getElementById('projected'),
+      required: document.getElementById('required'),
+      calcBtn: document.getElementById('calcBtn')
     };
-    localStorage.setItem('mvp-money-planner', JSON.stringify(data));
-  }
 
-  function restoreLocal(){
-    const raw = localStorage.getItem('mvp-money-planner');
-    if(!raw) return;
-    try{
-      const data = JSON.parse(raw);
-      els.initial.value = data.initial ?? els.initial.value;
-      els.goal.value = data.goal ?? '';
-      els.inflation.value = data.inflation ?? els.inflation.value;
-      (data.scenarios || []).forEach(s => {
-        const months = (s.years || 1) * 12;
-        const series = simulate({ initial: +els.initial.value || 0, monthly: s.monthly, apy: s.apy, months });
-        state.scenarios.push({ ...s, months, series });
-      });
-    }catch(e){ console.warn('restore failed', e); }
-  }
+    function recalc() {
+      const goal = parseFloat(els.goal.value || 0);
+      const years = parseFloat(els.years.value || 0);
+      const ret = parseFloat(els.annualReturn.value || 0);
+      const monthly = parseFloat(els.monthlyInvest.value || 0);
+      const fv = futureValue(monthly, ret, years);
+      const req = requiredMonthlyForGoal(goal, ret, years);
+      els.projected.textContent = isFinite(fv) ? fmt(fv) : '—';
+      els.required.textContent = isFinite(req) ? fmt(req) : '—';
+    }
 
-  // Goal calculator button
-  els.goalCalcBtn.onclick = () => {
-    const goal = +els.goal.value || 0;
-    if(goal <= 0){ els.goalCalcOut.textContent = 'ใส่เป้าหมายเงินก่อน'; return; }
-    const years = +els.years.value || 5;
-    const apy = +els.apy.value || 0;
-    const months = years * 12;
-    const needed = requiredMonthlyForGoal({ initial: +els.initial.value||0, apy, months, goal });
-    els.goalCalcOut.textContent = `หากต้องการถึงเป้าใน ${years} ปี (APY ${apy}%) ต้องออมอย่างน้อย ~ ${toBaht(needed)} ต่อเดือน`;
-  };
+    els.calcBtn.addEventListener('click', recalc);
+    recalc();
 
-  // Bind UI
-  els.addScenarioBtn.onclick = addScenarioFromForm;
-  els.addPresetBtn.onclick = addPresets;
-  els.exportCsvBtn.onclick = exportCsv;
-  els.saveBtn.onclick = saveLocal;
-  els.resetBtn.onclick = () => { if(confirm('ล้างข้อมูลทั้งหมด?')){ localStorage.removeItem('mvp-money-planner'); location.reload(); } };
+    // Scenario buttons
+    const scIncome = document.getElementById('scIncome');
+    const scExpense = document.getElementById('scExpense');
+    const scInvest = document.getElementById('scInvest');
+    const cardIncome = document.getElementById('cardIncome');
+    const cardExpense = document.getElementById('cardExpense');
+    const cardInvest = document.getElementById('cardInvest');
 
-  // Refresh on base change
-  ['initial','goal','inflation'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => updateAll());
-  });
+    document.querySelectorAll('.scenario').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const income = Number(btn.dataset.income);
+        const expense = Number(btn.dataset.expense);
+        const invest = Number(btn.dataset.invest);
+        scIncome.textContent = fmt(income);
+        scExpense.textContent = fmt(expense);
+        scInvest.textContent = fmt(invest);
+        cardIncome.textContent = fmt(income);
+        cardExpense.textContent = fmt(expense);
+        cardInvest.textContent = fmt(invest);
+        document.getElementById('monthlyInvest').value = invest;
+        recalc();
+      })
+    });
 
-  // Init
-  restoreLocal();
-  updateAll();
-</script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Slides
+    const deck = document.getElementById('deck');
+    const outline = document.getElementById('outline');
+    const btnSlideMode = document.getElementById('btnSlideMode');
+    const btnOutlineMode = document.getElementById('btnOutlineMode');
+    const slideBody = document.getElementById('slideBody');
+    const slideTitle = document.getElementById('slideTitle');
+    const slideCounter = document.getElementById('slideCounter');
+    const nextSlideBtn = document.getElementById('nextSlide');
+    const prevSlideBtn = document.getElementById('prevSlide');
+
+    const slides = [
+      {
+        title: 'Slide 1 – Title',
+        html: `<h3 class="text-2xl font-bold">ระบบโค้ชการเงินอัจฉริยะ (Smart Financial Coach System)</h3>
+               <p class="mt-3 text-slate-700">ผู้พัฒนา: <strong>Konpob</strong> – CEO</p>`
+      },
+      {
+        title: 'Slide 2 – Problem',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>ไม่รู้วิธีวางแผนการเงิน / ใช้จ่ายเกินรายได้ / ออมไม่ถึงเป้า</li>
+                <li>ตัวอย่าง: รายได้ 15,000 → ใช้ 10,000 → ลงทุน 5,000 → ไม่ถึง 20 ล้านใน 20 ปี</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 3 – Solution',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>วิเคราะห์รายได้–ค่าใช้จ่าย–การลงทุน</li>
+                <li>กำหนดเป้าหมาย & จำลองเส้นทาง (พนักงาน/ฟรีแลนซ์/ธุรกิจ)</li>
+                <li>ข้อดี–ข้อเสีย–ความเสี่ยง • คำนวณเวลาถึงเป้า</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 4 – Problem–Solution Fit',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>ปัญหา: ขาดระบบในการวางแผน</li>
+                <li>วิธีแก้: ระบบคำนวณและแนะนำเส้นทาง</li>
+                <li>ผลลัพธ์: เห็นเป้าหมายชัด & ปรับแผนได้</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 5 – Product–Market Fit',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>Product: แอป/เว็บโค้ชการเงิน</li>
+                <li>Market: พนักงานประจำ, ฟรีแลนซ์, ผู้ประกอบการ</li>
+                <li>Fit: ความต้องการสูงและต่อเนื่อง</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 6 – Business–Market Fit',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>Subscription + Affiliate/Commission</li>
+                <li>ตลาดการเงินและการลงทุนโตเร็ว</li>
+                <li>ศักยภาพรายได้ยั่งยืน</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 7 – Features',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>วิเคราะห์รายได้–รายจ่าย–หนี้สิน</li>
+                <li>ตั้งเป้าหมาย • สร้างเส้นทาง (ปลอดภัย/เสี่ยงสูง)</li>
+                <li>คำนวณเวลา • คำแนะนำ & ความเสี่ยง • ปรับแผนอัตโนมัติ</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 8 – Team',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>CEO: วิสัยทัศน์ กลยุทธ์ ทิศทาง</li>
+                <li>CFO: สูตรคำนวณ การเงิน ความเสี่ยง</li>
+                <li>CMO: การตลาด แบรนด์ การเติบโตผู้ใช้</li>
+                <li>COO: ปฏิบัติการ ระบบ ทีม IT</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 9 – Business Plan',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>เริ่มต้นต้นทุนต่ำ: ใช้ความรู้ IT + Marketing</li>
+                <li>Prototype → ทดลองตลาด → SaaS</li>
+                <li>รายได้: ค่าสมาชิก + Affiliate</li>
+               </ul>`
+      },
+      {
+        title: 'Slide 10 – Vision',
+        html: `<ul class="list-disc list-inside text-slate-700 space-y-2">
+                <li>ขยายจากการเงิน → Education / Skill / Sport</li>
+                <li>เป้าหมาย: ระบบโค้ชเป้าหมายชีวิตอัจฉริยะ</li>
+               </ul>`
+      }
+    ];
+
+    let idx = 0;
+    function render() {
+      slideTitle.textContent = slides[idx].title;
+      slideBody.innerHTML = slides[idx].html;
+      slideCounter.textContent = `${idx+1}/${slides.length}`;
+    }
+
+    function showDeck() {
+      deck.classList.remove('hidden');
+      outline.classList.add('hidden');
+      btnSlideMode.classList.add('hidden');
+      btnOutlineMode.classList.remove('hidden');
+      render();
+    }
+    function showOutline() {
+      deck.classList.add('hidden');
+      outline.classList.remove('hidden');
+      btnOutlineMode.classList.add('hidden');
+      btnSlideMode.classList.remove('hidden');
+    }
+
+    btnSlideMode.addEventListener('click', showDeck);
+    btnOutlineMode.addEventListener('click', showOutline);
+    nextSlideBtn.addEventListener('click', () => { idx = (idx + 1) % slides.length; render(); });
+    prevSlideBtn.addEventListener('click', () => { idx = (idx - 1 + slides.length) % slides.length; render(); });
+
+    // keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (deck.classList.contains('hidden')) return;
+      if (e.key === 'ArrowRight') { idx = (idx + 1) % slides.length; render(); }
+      if (e.key === 'ArrowLeft') { idx = (idx - 1 + slides.length) % slides.length; render(); }
+      const n = parseInt(e.key, 10);
+      if (!Number.isNaN(n) && n >= 1 && n <= slides.length) { idx = n - 1; render(); }
+    });
+
+    // click card to open that slide
+    document.querySelectorAll('.slide-card').forEach(card => {
+      card.addEventListener('click', () => { idx = Number(card.dataset.idx) || 0; showDeck(); });
+    });
+
+    // print
+    document.getElementById('btnPrint').addEventListener('click', () => window.print());
+  </script>
 </body>
 </html>
